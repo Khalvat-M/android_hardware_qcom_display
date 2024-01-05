@@ -43,8 +43,7 @@ using namespace qhwc;
 namespace qClient {
 
 // ----------------------------------------------------------------------------
-QClient::QClient(hwc_context_t *ctx) : mHwcContext(ctx),
-        mMPDeathNotifier(new MPDeathNotifier(ctx))
+QClient::QClient(hwc_context_t *ctx) : mHwcContext(ctx)
 {
     ALOGD_IF(QCLIENT_DEBUG, "QClient Constructor invoked");
 }
@@ -54,38 +53,6 @@ QClient::~QClient()
     ALOGD_IF(QCLIENT_DEBUG,"QClient Destructor invoked");
 }
 
-static void securing(hwc_context_t *ctx, uint32_t startEnd) {
-    Locker::Autolock _sl(ctx->mDrawLock);
-    //The only way to make this class in this process subscribe to media
-    //player's death.
-    IMediaDeathNotifier::getMediaPlayerService();
-
-    ctx->mSecuring = startEnd;
-    //We're done securing
-    if(startEnd == IQService::END)
-        ctx->mSecureMode = true;
-    if(ctx->proc)
-        ctx->proc->invalidate(ctx->proc);
-}
-
-static void unsecuring(hwc_context_t *ctx, uint32_t startEnd) {
-    Locker::Autolock _sl(ctx->mDrawLock);
-    ctx->mSecuring = startEnd;
-    //We're done unsecuring
-    if(startEnd == IQService::END)
-        ctx->mSecureMode = false;
-    if(ctx->proc)
-        ctx->proc->invalidate(ctx->proc);
-}
-
-void QClient::MPDeathNotifier::died() {
-    Locker::Autolock _sl(mHwcContext->mDrawLock);
-    ALOGD_IF(QCLIENT_DEBUG, "Media Player died");
-    mHwcContext->mSecuring = false;
-    mHwcContext->mSecureMode = false;
-    if(mHwcContext->proc)
-        mHwcContext->proc->invalidate(mHwcContext->proc);
-}
 
 static android::status_t screenRefresh(hwc_context_t *ctx) {
     status_t result = NO_INIT;
@@ -276,10 +243,8 @@ status_t QClient::notifyCallback(uint32_t command, const Parcel* inParcel,
 
     switch(command) {
         case IQService::SECURING:
-            securing(mHwcContext, inParcel->readInt32());
             break;
         case IQService::UNSECURING:
-            unsecuring(mHwcContext, inParcel->readInt32());
             break;
         case IQService::SCREEN_REFRESH:
             return screenRefresh(mHwcContext);
