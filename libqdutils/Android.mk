@@ -18,7 +18,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_SHARED_LIBRARIES          := liblog libcutils
+LOCAL_SHARED_LIBRARIES          := liblog libcutils libhardware
 LOCAL_HEADER_LIBRARIES          := display_headers generated_kernel_headers
 LOCAL_SRC_FILES                 := qdMetaData.cpp
 LOCAL_CFLAGS                    := $(common_flags) -Wno-sign-conversion

@@ -32,6 +32,7 @@
 #include <hwc_utils.h>
 #include <hwc_vpuclient.h>
 #include <display_config.h>
+#include <binder/Parcel.h>
 
 #define QCLIENT_DEBUG 0
 
